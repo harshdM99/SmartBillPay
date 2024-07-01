@@ -1,0 +1,5 @@
+# Environment file
+.env
+
+# WebDriver folder
+chromedriver-win64/
