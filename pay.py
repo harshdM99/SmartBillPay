@@ -55,12 +55,25 @@ def login(driver):
     if submit_button:
         submit_button.click()
 
+def navigate_to_payment_page(driver):
+    credit_card = find_element_after_load(driver, By.NAME, "CCA_details")
+    if credit_card:
+        credit_card.click()
+        make_payment = find_element_after_load(driver, By.ID, "makePaymentWidget")
+        make_payment.click()
+        if make_payment:
+            return True
+    return False
+
 def main():
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     
     try:
         login(driver)
+        if not navigate_to_payment_page(driver):
+            raise WebDriverException
+        
     except WebDriverException as e:
         print("error: ", e)
     finally:
