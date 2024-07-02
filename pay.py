@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 
 debug_mode = True
 load_dotenv()
@@ -16,6 +16,19 @@ load_dotenv()
 BRAVE_PATH = os.getenv("BRAVE_PATH")
 USER_ID = os.getenv("USER_ID")
 PASSWORD = os.getenv("PASSWORD")
+LOGIN_PAGE = os.getenv("LOGIN_PAGE")
+
+# get driver path
+script_path = Path(__file__).resolve().parent
+driver_path = script_path.joinpath("chromedriver-win64", "chromedriver.exe")
+
+# set options
+chrome_options = Options()
+chrome_options.binary_location = BRAVE_PATH
+if debug_mode:
+    chrome_options.add_experimental_option("detach", True)
+else:
+    chrome_options.add_argument("--headless")
 
 def find_element_after_load(driver, by, element_identifier, timeout=5):
     try:
@@ -26,34 +39,33 @@ def find_element_after_load(driver, by, element_identifier, timeout=5):
         return None
     return driver.find_element(by, element_identifier)
 
-# create service
-script_path = Path(__file__).resolve().parent
-driver_path = script_path.joinpath("chromedriver-win64", "chromedriver.exe")
-service = Service(driver_path)
+def login(driver):
+    # get website
+    driver.get(LOGIN_PAGE)
 
-# set options
-chrome_options = Options()
-chrome_options.binary_location = BRAVE_PATH
-if debug_mode:
-    chrome_options.add_experimental_option("detach", True)
-else:
-    chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(service=service, options=chrome_options)
+    # get inputs
+    user_id_input = find_element_after_load(driver, By.ID, "enterID-input")
+    password_input = find_element_after_load(driver, By.ID, "tlpvt-passcode-input")
 
-# get website
-driver.get("https://secure.bankofamerica.com/login/sign-in/signOnV2Screen.go")
+    if user_id_input and password_input:
+        user_id_input.send_keys(USER_ID)
+        password_input.send_keys(PASSWORD)
 
-# get inputs
-user_id_input = find_element_after_load(driver, By.ID, "enterID-input")
-password_input = find_element_after_load(driver, By.ID, "tlpvt-passcode-input")
+    submit_button = find_element_after_load(driver, By.ID, "login_button")
+    if submit_button:
+        submit_button.click()
 
-if user_id_input and password_input:
-    user_id_input.send_keys(USER_ID)
-    password_input.send_keys(PASSWORD)
+def main():
+    service = Service(driver_path)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    try:
+        login(driver)
+    except WebDriverException as e:
+        print("error: ", e)
+    finally:
+        if not debug_mode:
+            driver.quit()
 
-submit_button = find_element_after_load(driver, By.ID, "login_button")
-if submit_button:
-    submit_button.click()
-
-if not debug_mode:
-    driver.quit()
+if __name__ == "__main__":
+    main()
