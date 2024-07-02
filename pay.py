@@ -18,7 +18,13 @@ chrome_options.binary_location = brave_path
 
 service = Service(driver_path)
 
+if debug_mode:
+    print("In debug mode : ")
+    chrome_options.add_experimental_option("detach", True)
+else:
+    chrome_options.add_argument("--headless")
+
 driver = webdriver.Chrome(service=service, options=chrome_options)
-driver.get("https://www.google.com")
+driver.get("https://secure.bankofamerica.com/login/sign-in/signOnV2Screen.go")
 
 driver.quit()
