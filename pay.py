@@ -17,6 +17,15 @@ BRAVE_PATH = os.getenv("BRAVE_PATH")
 USER_ID = os.getenv("USER_ID")
 PASSWORD = os.getenv("PASSWORD")
 
+def find_element_after_load(driver, by, element_identifier, timeout=5):
+    try:
+        element_present = EC.presence_of_element_located((by, element_identifier))
+        WebDriverWait(driver, timeout).until(element_present)
+    except TimeoutException:
+        print(f"Timed out! Could not load {element_identifier}")
+        return None
+    return driver.find_element(by, element_identifier)
+
 # create service
 script_path = Path(__file__).resolve().parent
 driver_path = script_path.joinpath("chromedriver-win64", "chromedriver.exe")
@@ -35,14 +44,14 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 driver.get("https://secure.bankofamerica.com/login/sign-in/signOnV2Screen.go")
 
 # get inputs
-user_id_input = driver.find_element(By.ID, "enterID-input")
-password_input = driver.find_element(By.ID, "tlpvt-passcode-input")
+user_id_input = find_element_after_load(driver, By.ID, "enterID-input")
+password_input = find_element_after_load(driver, By.ID, "tlpvt-passcode-input")
 
 if user_id_input and password_input:
     user_id_input.send_keys(USER_ID)
     password_input.send_keys(PASSWORD)
 
-submit_button = driver.find_element(By.ID, "login_button")
+submit_button = find_element_after_load(driver, By.ID, "login_button")
 if submit_button:
     submit_button.click()
 
