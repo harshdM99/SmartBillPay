@@ -5,10 +5,11 @@ from dotenv import load_dotenv
 from pathlib import Path
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 debug_mode = True
 load_dotenv()
@@ -59,11 +60,35 @@ def navigate_to_payment_page(driver):
     credit_card = find_element_after_load(driver, By.NAME, "CCA_details")
     if credit_card:
         credit_card.click()
-        make_payment = find_element_after_load(driver, By.ID, "makePaymentWidget")
-        make_payment.click()
-        if make_payment:
+        make_payment_button = find_element_after_load(driver, By.ID, "makePaymentWidget")
+        make_payment_button.click()
+        if make_payment_button:
             return True
     return False
+
+def make_payment(driver):
+    # TODO: take this as runtime argument i.e if statement balance or current balance
+    actions = ActionChains(driver)
+    
+    amount_to_pay_input = find_element_after_load(driver, By.ID, "amount")
+    actions.move_to_element(amount_to_pay_input).click().perform()
+
+    pay_statement_balance = True 
+    if pay_statement_balance:
+        amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
+    else:
+        amount_to_pay_ul = find_element_after_load(driver, By.ID, "current-balance-link")
+
+    amount_to_pay_option = find_element_after_load(amount_to_pay_ul, By.TAG_NAME, "a")
+    payment_button = find_element_after_load(driver, By.ID, "continue-bpPayment")
+    
+    if amount_to_pay_option and payment_button:
+        amount_to_pay_option.click()
+        payment_button.click()
+
+        # TODO: uncomment to confirm the payment
+        # confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
+        # confirm_payment_button.click()
 
 def main():
     service = Service(driver_path)
@@ -73,7 +98,7 @@ def main():
         login(driver)
         if not navigate_to_payment_page(driver):
             raise WebDriverException
-        
+        make_payment(driver)
     except WebDriverException as e:
         print("error: ", e)
     finally:
