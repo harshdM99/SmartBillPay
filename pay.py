@@ -84,8 +84,10 @@ def navigate_to_payment_page(driver):
     return False
 
 def make_payment(driver):
-    actions = ActionChains(driver)
+    if not navigate_to_payment_page(driver):
+        return False
     
+    actions = ActionChains(driver)
     amount_to_pay_input = find_element_after_load(driver, By.ID, "amount")
     actions.move_to_element(amount_to_pay_input).click().perform()
     
@@ -132,12 +134,14 @@ def main():
     
     try:
         login(driver)
-        if not navigate_to_payment_page(driver):
-            raise Exception
-        if not make_payment(driver):
-            raise Exception
-    except Exception as e:
-        logging.info("Exiting! Payment Failed with error : ", e)
+
+        payment_status = make_payment(driver)
+        if payment_status:
+            logging.info("Payment Success")
+        else:
+            logging.info("Payment Failed")
+    except WebDriverException as e:
+        logging.info("Difficulty with WebDriver : ", e)
     finally:
         if not debug_mode:
             driver.quit()
