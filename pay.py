@@ -1,5 +1,7 @@
 from selenium import webdriver
 import os
+import logging
+import io
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -13,6 +15,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 # TODO: make this a runtime arg
 debug_mode = True
+
+log_stream = io.StringIO()
+log_format = "%(message)s"
+logging.basicConfig(stream=log_stream, level=logging.INFO, format=log_format)
+
 load_dotenv()
 
 BRAVE_PATH = os.getenv("BRAVE_PATH")
@@ -37,7 +44,7 @@ def find_element_after_load(driver, by, element_identifier, timeout=5):
         element_present = EC.presence_of_element_located((by, element_identifier))
         WebDriverWait(driver, timeout).until(element_present)
     except TimeoutException:
-        print(f"Timed out! Could not load {element_identifier}")
+        logging.info(f"Timed out! Could not load {element_identifier}")
         return None
     return driver.find_element(by, element_identifier)
 
@@ -56,15 +63,24 @@ def login(driver):
     submit_button = find_element_after_load(driver, By.ID, "login_button")
     if submit_button:
         submit_button.click()
+        logging.info("Successfully logged in to the account!")
 
 def navigate_to_payment_page(driver):
     credit_card = find_element_after_load(driver, By.NAME, "CCA_details")
     if credit_card:
-        credit_card.click()
-        make_payment_button = find_element_after_load(driver, By.ID, "makePaymentWidget")
-        make_payment_button.click()
-        if make_payment_button:
-            return True
+        try:
+            credit_card.click()
+            make_payment_button = find_element_after_load(driver, By.ID, "makePaymentWidget")
+            make_payment_button.click()
+            if make_payment_button:
+                logging.info("Successfully logged in to the account!")
+                return True
+            logging.info("Failed to navigate to payment page!")
+            return False
+        except:
+            logging.info("Failed to navigate to payment page!")
+
+    logging.info("Credit card not found!")
     return False
 
 def make_payment(driver):
@@ -76,8 +92,10 @@ def make_payment(driver):
     # TODO: take this as runtime argument i.e if statement balance or current balance
     pay_statement_balance = True 
     if pay_statement_balance:
+        logging.info("Paying statement balance")
         amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
     else:
+        logging.info("Paying current balance")
         amount_to_pay_ul = find_element_after_load(driver, By.ID, "current-balance-link")
 
     amount_to_pay_option = find_element_after_load(amount_to_pay_ul, By.TAG_NAME, "a")
@@ -90,18 +108,22 @@ def make_payment(driver):
             amount_to_pay_str = amount_to_pay_input.get_attribute('value')
             amount_to_pay = float(amount_to_pay_str)
 
-            if amount_to_pay <= 0.00 or amount_to_pay > 300.00:
+            if amount_to_pay <= 0.00:
+                logging.info("No payment due!")
+                return False
+            if amount_to_pay > 300.00:
+                logging.info("Amount more than $300.")
                 return False
         except ValueError:
             return False
 
         payment_button.click()
-
         # TODO: uncomment to confirm the payment
         # confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
         # confirm_payment_button.click()
 
         # TODO: additional check to confirm if payment successful
+        logging.info("Payment Successful!")
         return True
 
 def main():
@@ -112,9 +134,10 @@ def main():
         login(driver)
         if not navigate_to_payment_page(driver):
             raise Exception
-        make_payment(driver)
+        if not make_payment(driver):
+            raise Exception
     except Exception as e:
-        print("error: ", e)
+        logging.info("Exiting! Payment Failed with error : ", e)
     finally:
         if not debug_mode:
             driver.quit()
