@@ -11,6 +11,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
+# TODO: make this a runtime arg
 debug_mode = True
 load_dotenv()
 
@@ -67,12 +68,12 @@ def navigate_to_payment_page(driver):
     return False
 
 def make_payment(driver):
-    # TODO: take this as runtime argument i.e if statement balance or current balance
     actions = ActionChains(driver)
     
     amount_to_pay_input = find_element_after_load(driver, By.ID, "amount")
     actions.move_to_element(amount_to_pay_input).click().perform()
-
+    
+    # TODO: take this as runtime argument i.e if statement balance or current balance
     pay_statement_balance = True 
     if pay_statement_balance:
         amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
@@ -84,11 +85,24 @@ def make_payment(driver):
     
     if amount_to_pay_option and payment_button:
         amount_to_pay_option.click()
+
+        try:
+            amount_to_pay_str = amount_to_pay_input.get_attribute('value')
+            amount_to_pay = float(amount_to_pay_str)
+
+            if amount_to_pay <= 0.00 or amount_to_pay > 300.00:
+                return False
+        except ValueError:
+            return False
+
         payment_button.click()
 
         # TODO: uncomment to confirm the payment
         # confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
         # confirm_payment_button.click()
+
+        # TODO: additional check to confirm if payment successful
+        return True
 
 def main():
     service = Service(driver_path)
@@ -97,9 +111,9 @@ def main():
     try:
         login(driver)
         if not navigate_to_payment_page(driver):
-            raise WebDriverException
+            raise Exception
         make_payment(driver)
-    except WebDriverException as e:
+    except Exception as e:
         print("error: ", e)
     finally:
         if not debug_mode:
