@@ -3,3 +3,6 @@
 
 # WebDriver folder
 chromedriver-win64/
+
+# temporary files
+test_*

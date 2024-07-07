@@ -2,6 +2,8 @@ from selenium import webdriver
 import os
 import logging
 import io
+from email.message import EmailMessage
+import smtplib
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -26,6 +28,9 @@ BRAVE_PATH = os.getenv("BRAVE_PATH")
 USER_ID = os.getenv("USER_ID")
 PASSWORD = os.getenv("PASSWORD")
 LOGIN_PAGE = os.getenv("LOGIN_PAGE")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL_ID")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 
 # get driver path
 script_path = Path(__file__).resolve().parent
@@ -73,7 +78,7 @@ def navigate_to_payment_page(driver):
             make_payment_button = find_element_after_load(driver, By.ID, "makePaymentWidget")
             make_payment_button.click()
             if make_payment_button:
-                logging.info("Successfully logged in to the account!")
+                logging.info("Successfully reached the payment page!")
                 return True
             logging.info("Failed to navigate to payment page!")
             return False
@@ -125,8 +130,18 @@ def make_payment(driver):
         # confirm_payment_button.click()
 
         # TODO: additional check to confirm if payment successful
-        logging.info("Payment Successful!")
         return True
+
+def send_message(subject, receiver):
+    msg = EmailMessage()
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = receiver
+    msg['Subject'] = subject
+    msg.set_content(log_stream.getvalue())
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login(SENDER_EMAIL, EMAIL_PASSWORD)
+        smtp.send_message(msg)
 
 def main():
     service = Service(driver_path)
@@ -137,11 +152,16 @@ def main():
 
         payment_status = make_payment(driver)
         if payment_status:
-            logging.info("Payment Success")
+            message = "Payment Success!"
+            logging.info(message)
         else:
-            logging.info("Payment Failed")
+            message = "Payment failed!"
+            logging.info(message)
+        send_message(message, RECEIVER_EMAIL)
     except WebDriverException as e:
         logging.info("Difficulty with WebDriver : ", e)
+    except smtplib.SMTPException as e:
+        logging.info("Could not send email! ", e)
     finally:
         if not debug_mode:
             driver.quit()
