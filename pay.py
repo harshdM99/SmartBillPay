@@ -97,7 +97,7 @@ def make_payment(driver):
     actions.move_to_element(amount_to_pay_input).click().perform()
     
     # TODO: take this as runtime argument i.e if statement balance or current balance
-    pay_statement_balance = True 
+    pay_statement_balance = False 
     if pay_statement_balance:
         logging.info("Paying statement balance")
         amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
@@ -126,11 +126,14 @@ def make_payment(driver):
 
         payment_button.click()
         # TODO: uncomment to confirm the payment
-        # confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
-        # confirm_payment_button.click()
+        confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
+        confirm_payment_button.click()
 
         # TODO: additional check to confirm if payment successful
         return True
+    
+    logging.info("Facing issues! It might be possible that no current balance has been posted to your account yet.")
+    return False
 
 def send_message(subject, receiver):
     msg = EmailMessage()
@@ -163,7 +166,9 @@ def main():
     except smtplib.SMTPException as e:
         logging.info("Could not send email! ", e)
     finally:
-        if not debug_mode:
+        if debug_mode:
+            print(log_stream.getvalue())
+        else:
             driver.quit()
 
 if __name__ == "__main__":
