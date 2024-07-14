@@ -15,6 +15,8 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
+# TODO: GitHub readme
+# TODO: Docstring in functions
 # TODO: make this a runtime arg
 debug_mode = True
 
@@ -44,9 +46,15 @@ if debug_mode:
 else:
     chrome_options.add_argument("--headless")
 
-def find_element_after_load(driver, by, element_identifier, timeout=5):
+def find_element_after_load(driver, by, element_identifier, presence=True, timeout=5):
+    '''
+        Function to wait for either element visibility or clickability.
+    '''
     try:
-        element_present = EC.presence_of_element_located((by, element_identifier))
+        if presence:
+            element_present = EC.presence_of_element_located((by, element_identifier))
+        else:
+            element_present = EC.element_to_be_clickable((by, element_identifier))
         WebDriverWait(driver, timeout).until(element_present)
     except TimeoutException:
         logging.info(f"Timed out! Could not load {element_identifier}")
@@ -120,13 +128,16 @@ def make_payment(driver):
                 return False
             if amount_to_pay > 300.00:
                 logging.info("Amount more than $300.")
-                return False
+                # return False
         except ValueError:
             return False
 
         payment_button.click()
-        # TODO: uncomment to confirm the payment
-        confirm_payment_button = find_element_after_load(driver, By.ID, "continue-bp-payment-confirm")
+
+        # Wait for the modal to be visible
+        # WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "confirm-payment-container-ModalContainer")))
+
+        confirm_payment_button = find_element_after_load(driver, By.XPATH, "//a[@id='continue-bp-payment-confirm']/span", False)
         confirm_payment_button.click()
 
         # TODO: additional check to confirm if payment successful
