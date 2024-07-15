@@ -106,6 +106,7 @@ def make_payment(driver):
     if not navigate_to_payment_page(driver):
         return False
 
+    # try:
     actions = ActionChains(driver)
     open_account_input = find_element_after_load(driver, By.ID, "select-input_paymentFromAccount")
     actions.move_to_element(open_account_input).click().perform()
@@ -115,9 +116,8 @@ def make_payment(driver):
     )
     choose_account_input.click()
 
-    choose_amt_input = WebDriverWait(driver, 5).until(
-        EC.visibility_of_element_located((By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']"))
-    )
+    choose_amt_input = find_element_after_load(driver, By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']")
+    print(choose_amt_input)
 
     if choose_amt_input:
         amount_to_pay_str = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
@@ -143,7 +143,8 @@ def make_payment(driver):
     else:
         logging.info("No current balance found! Exiting..")
         return False
-    
+    # except:
+        
     return True
 
 def send_message(subject, receiver):
