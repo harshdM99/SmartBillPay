@@ -123,10 +123,12 @@ def make_payment(driver):
         choose_amt_input.click()
         next_button = find_element_after_load(driver, By.XPATH, "//button[text()='Next']")
         next_button.click()
+
+        confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
+        confirm_button.click()
     else:
         logging.info("No current balance found! Exiting..")
     
-
     # TODO: uncomment to confirm payment
     # confirm_button = WebDriverWait(driver, 5).until(
     #     EC.visibility_of_element_located((By.XPATH, "//button[contains(., 'Schedule')]"))
