@@ -117,15 +117,12 @@ def make_payment(driver):
     choose_account_input.click()
 
     choose_amt_input = find_element_after_load(driver, By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']")
-    print(choose_amt_input)
 
     if choose_amt_input:
         amount_to_pay_element = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
         amount_to_pay_text_str = amount_to_pay_element.text.split("\n")[0]      # get all the text and take first line which contains amount 
-        print(amount_to_pay_text_str)
         amount_to_pay_str = amount_to_pay_text_str[amount_to_pay_text_str.find('$')+1:]
         amount_to_pay = float(amount_to_pay_str)
-        print(amount_to_pay)
 
         if amount_to_pay <= 0.00:
             logging.info("No payment due!")
@@ -139,7 +136,6 @@ def make_payment(driver):
         next_button.click()
 
         confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
-        print(confirm_button)
         # confirm_button.click()
         # TODO: additional check to confirm if payment successful
     else:
@@ -174,7 +170,7 @@ def main():
         else:
             message = "Payment failed!"
             logging.info(message)
-        # send_message(message, RECEIVER_EMAIL)
+        send_message(message, RECEIVER_EMAIL)
     except WebDriverException as e:
         logging.info("Difficulty with WebDriver : ", e)
     except smtplib.SMTPException as e:
