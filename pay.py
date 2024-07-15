@@ -120,36 +120,27 @@ def make_payment(driver):
     )
 
     if choose_amt_input:
+        amount_to_pay_str = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
+        amount_to_pay_str = amount_to_pay_str[amount_to_pay_str.find('$'):]
+        amount_to_pay = float(amount_to_pay_str)
+        print(amount_to_pay)
+
+        if amount_to_pay <= 0.00:
+            logging.info("No payment due!")
+            return False
+        if amount_to_pay > 300.00:
+            logging.info("Amount more than $300.")
+            # return False
+
         choose_amt_input.click()
         next_button = find_element_after_load(driver, By.XPATH, "//button[text()='Next']")
         next_button.click()
 
         confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
-        confirm_button.click()
+        print(confirm_button)
+        # confirm_button.click()
     else:
         logging.info("No current balance found! Exiting..")
-    
-    # TODO: uncomment to confirm payment
-    # confirm_button = WebDriverWait(driver, 5).until(
-    #     EC.visibility_of_element_located((By.XPATH, "//button[contains(., 'Schedule')]"))
-    # )
-    # confirm_button.click()  
-    
-    # OLD
-    # TODO: take this as runtime argument i.e if statement balance or current balance
-    # pay_statement_balance = False 
-    # if pay_statement_balance:
-    #     logging.info("Paying statement balance")
-    #     amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
-    # else:
-    #     logging.info("Paying current balance")
-    #     amount_to_pay_ul = find_element_after_load(driver, By.ID, "current-balance-link")
-
-    # amount_to_pay_option = find_element_after_load(amount_to_pay_ul, By.TAG_NAME, "a")
-    # payment_button = find_element_after_load(driver, By.ID, "continue-bpPayment")
-    
-    # if amount_to_pay_option and payment_button:
-    #     amount_to_pay_option.click()
 
     #     try:
     #         amount_to_pay_str = amount_to_pay_input.get_attribute('value')
