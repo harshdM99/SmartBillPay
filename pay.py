@@ -4,6 +4,7 @@ import logging
 import io
 from email.message import EmailMessage
 import smtplib
+import argparse
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -17,8 +18,12 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 # TODO: GitHub readme
 # TODO: Docstring in functions
-# TODO: make this a runtime arg
-debug_mode = True
+parser = argparse.ArgumentParser(description='Automate BoFA credit card bill payment process and send email notifications')
+parser.add_argument("-d", "--debug", action='store_true', default=False, help="Enable debug mode (By default it is disabled)")
+args = parser.parse_args()
+
+debug_mode = args.debug
+print(debug_mode)
 
 log_stream = io.StringIO()
 log_format = "%(message)s"
