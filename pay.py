@@ -106,42 +106,44 @@ def make_payment(driver):
     if not navigate_to_payment_page(driver):
         return False
 
-    # try:
-    actions = ActionChains(driver)
-    open_account_input = find_element_after_load(driver, By.ID, "select-input_paymentFromAccount")
-    actions.move_to_element(open_account_input).click().perform()
+    try:
+        actions = ActionChains(driver)
+        open_account_input = find_element_after_load(driver, By.ID, "select-input_paymentFromAccount")
+        actions.move_to_element(open_account_input).click().perform()
 
-    choose_account_input = WebDriverWait(driver, 5).until(
-        EC.visibility_of_element_located((By.XPATH, "//div[@id='paymentFromAccount_select-dropdown']//span[contains(., 'Adv SafeBalance Banking')]"))
-    )
-    choose_account_input.click()
+        choose_account_input = WebDriverWait(driver, 5).until(
+            EC.visibility_of_element_located((By.XPATH, "//div[@id='paymentFromAccount_select-dropdown']//span[contains(., 'Adv SafeBalance Banking')]"))
+        )
+        choose_account_input.click()
 
-    choose_amt_input = find_element_after_load(driver, By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']")
+        choose_amt_input = find_element_after_load(driver, By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']")
 
-    if choose_amt_input:
-        amount_to_pay_element = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
-        amount_to_pay_text_str = amount_to_pay_element.text.split("\n")[0]      # get all the text and take first line which contains amount 
-        amount_to_pay_str = amount_to_pay_text_str[amount_to_pay_text_str.find('$')+1:]
-        amount_to_pay = float(amount_to_pay_str)
+        if choose_amt_input:
+            amount_to_pay_element = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
+            amount_to_pay_text_str = amount_to_pay_element.text.split("\n")[0]      # get all the text and take first line which contains amount 
+            amount_to_pay_str = amount_to_pay_text_str[amount_to_pay_text_str.find('$')+1:]
+            amount_to_pay = float(amount_to_pay_str)
 
-        if amount_to_pay <= 0.00:
-            logging.info("No payment due!")
+            if amount_to_pay <= 0.00:
+                logging.info("No payment due!")
+                return False
+            if amount_to_pay > 300.00:
+                logging.info("Amount more than $300.")
+                # return False
+
+            choose_amt_input.click()
+            next_button = find_element_after_load(driver, By.XPATH, "//button[text()='Next']")
+            next_button.click()
+
+            confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
+            # confirm_button.click()
+            # TODO: additional check to confirm if payment successful
+        else:
+            logging.info("No current balance found! Exiting..")
             return False
-        if amount_to_pay > 300.00:
-            logging.info("Amount more than $300.")
-            # return False
-
-        choose_amt_input.click()
-        next_button = find_element_after_load(driver, By.XPATH, "//button[text()='Next']")
-        next_button.click()
-
-        confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
-        # confirm_button.click()
-        # TODO: additional check to confirm if payment successful
-    else:
-        logging.info("No current balance found! Exiting..")
+    except Exception as e:
+        logging.info("Error : ", e)
         return False
-    # except:
         
     return True
 
