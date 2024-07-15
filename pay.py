@@ -79,72 +79,102 @@ def login(driver):
         logging.info("Successfully logged in to the account!")
 
 def navigate_to_payment_page(driver):
-    credit_card = find_element_after_load(driver, By.NAME, "CCA_details")
-    if credit_card:
-        try:
-            credit_card.click()
-            make_payment_button = find_element_after_load(driver, By.ID, "makePaymentWidget")
-            make_payment_button.click()
-            if make_payment_button:
-                logging.info("Successfully reached the payment page!")
-                return True
-            logging.info("Failed to navigate to payment page!")
-            return False
-        except:
-            logging.info("Failed to navigate to payment page!")
+    actions = ActionChains(driver)
 
-    logging.info("Credit card not found!")
+    try:
+        credit_card_payment = find_element_after_load(driver, By.XPATH, "//li[@id='fsd-li-transfers']/a")
+
+        if credit_card_payment:
+            actions.move_to_element(credit_card_payment).perform()
+
+            payment_button = WebDriverWait(driver, 5).until(
+                EC.visibility_of_element_located((By.XPATH, "//div[@id='bofa-credit-loan']/a[@name='onh_inside_bank_make_transfer']"))
+            )
+
+            if payment_button is None:
+                logging.info("Cannot find the payment button")
+                return False
+
+            actions.move_to_element(payment_button).click().perform()
+            return True
+    except Exception as e:
+        logging.info("Failed to navigate to payment page!\n", e)
+    
     return False
 
 def make_payment(driver):
     if not navigate_to_payment_page(driver):
         return False
-    
+
     actions = ActionChains(driver)
-    amount_to_pay_input = find_element_after_load(driver, By.ID, "amount")
-    actions.move_to_element(amount_to_pay_input).click().perform()
-    
-    # TODO: take this as runtime argument i.e if statement balance or current balance
-    pay_statement_balance = False 
-    if pay_statement_balance:
-        logging.info("Paying statement balance")
-        amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
+    open_account_input = find_element_after_load(driver, By.ID, "select-input_paymentFromAccount")
+    actions.move_to_element(open_account_input).click().perform()
+
+    choose_account_input = WebDriverWait(driver, 5).until(
+        EC.visibility_of_element_located((By.XPATH, "//div[@id='paymentFromAccount_select-dropdown']//span[contains(., 'Adv SafeBalance Banking')]"))
+    )
+    choose_account_input.click()
+
+    choose_amt_input = WebDriverWait(driver, 5).until(
+        EC.visibility_of_element_located((By.XPATH, "//fieldset[@id='creditCardAmount']//input[@id='cca_option_current_balance']"))
+    )
+
+    if choose_amt_input:
+        choose_amt_input.click()
+        next_button = find_element_after_load(driver, By.XPATH, "//button[text()='Next']")
+        next_button.click()
     else:
-        logging.info("Paying current balance")
-        amount_to_pay_ul = find_element_after_load(driver, By.ID, "current-balance-link")
-
-    amount_to_pay_option = find_element_after_load(amount_to_pay_ul, By.TAG_NAME, "a")
-    payment_button = find_element_after_load(driver, By.ID, "continue-bpPayment")
+        logging.info("No current balance found! Exiting..")
     
-    if amount_to_pay_option and payment_button:
-        amount_to_pay_option.click()
 
-        try:
-            amount_to_pay_str = amount_to_pay_input.get_attribute('value')
-            amount_to_pay = float(amount_to_pay_str)
-
-            if amount_to_pay <= 0.00:
-                logging.info("No payment due!")
-                return False
-            if amount_to_pay > 300.00:
-                logging.info("Amount more than $300.")
-                # return False
-        except ValueError:
-            return False
-
-        payment_button.click()
-
-        # Wait for the modal to be visible
-        # WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "confirm-payment-container-ModalContainer")))
-
-        confirm_payment_button = find_element_after_load(driver, By.XPATH, "//a[@id='continue-bp-payment-confirm']/span", False)
-        confirm_payment_button.click()
-
-        # TODO: additional check to confirm if payment successful
-        return True
+    # TODO: uncomment to confirm payment
+    # confirm_button = WebDriverWait(driver, 5).until(
+    #     EC.visibility_of_element_located((By.XPATH, "//button[contains(., 'Schedule')]"))
+    # )
+    # confirm_button.click()  
     
-    logging.info("Facing issues! It might be possible that no current balance has been posted to your account yet.")
-    return False
+    # OLD
+    # TODO: take this as runtime argument i.e if statement balance or current balance
+    # pay_statement_balance = False 
+    # if pay_statement_balance:
+    #     logging.info("Paying statement balance")
+    #     amount_to_pay_ul = find_element_after_load(driver, By.ID, "statement-balance-link")
+    # else:
+    #     logging.info("Paying current balance")
+    #     amount_to_pay_ul = find_element_after_load(driver, By.ID, "current-balance-link")
+
+    # amount_to_pay_option = find_element_after_load(amount_to_pay_ul, By.TAG_NAME, "a")
+    # payment_button = find_element_after_load(driver, By.ID, "continue-bpPayment")
+    
+    # if amount_to_pay_option and payment_button:
+    #     amount_to_pay_option.click()
+
+    #     try:
+    #         amount_to_pay_str = amount_to_pay_input.get_attribute('value')
+    #         amount_to_pay = float(amount_to_pay_str)
+
+    #         if amount_to_pay <= 0.00:
+    #             logging.info("No payment due!")
+    #             return False
+    #         if amount_to_pay > 300.00:
+    #             logging.info("Amount more than $300.")
+    #             # return False
+    #     except ValueError:
+    #         return False
+
+    #     payment_button.click()
+
+    #     # Wait for the modal to be visible
+    #     # WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "confirm-payment-container-ModalContainer")))
+
+    #     confirm_payment_button = find_element_after_load(driver, By.XPATH, "//a[@id='continue-bp-payment-confirm']/span", False)
+    #     confirm_payment_button.click()
+
+    #     # TODO: additional check to confirm if payment successful
+    #     return True
+    
+    # logging.info("Facing issues! It might be possible that no current balance has been posted to your account yet.")
+    # return False
 
 def send_message(subject, receiver):
     msg = EmailMessage()
@@ -171,7 +201,7 @@ def main():
         else:
             message = "Payment failed!"
             logging.info(message)
-        send_message(message, RECEIVER_EMAIL)
+        # send_message(message, RECEIVER_EMAIL)
     except WebDriverException as e:
         logging.info("Difficulty with WebDriver : ", e)
     except smtplib.SMTPException as e:
