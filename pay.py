@@ -120,8 +120,10 @@ def make_payment(driver):
     print(choose_amt_input)
 
     if choose_amt_input:
-        amount_to_pay_str = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
-        amount_to_pay_str = amount_to_pay_str[amount_to_pay_str.find('$'):]
+        amount_to_pay_element = find_element_after_load(driver, By.XPATH, "//label[@for='cca_option_current_balance']")
+        amount_to_pay_text_str = amount_to_pay_element.text.split("\n")[0]      # get all the text and take first line which contains amount 
+        print(amount_to_pay_text_str)
+        amount_to_pay_str = amount_to_pay_text_str[amount_to_pay_text_str.find('$')+1:]
         amount_to_pay = float(amount_to_pay_str)
         print(amount_to_pay)
 
