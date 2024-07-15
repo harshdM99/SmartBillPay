@@ -139,35 +139,12 @@ def make_payment(driver):
         confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
         print(confirm_button)
         # confirm_button.click()
+        # TODO: additional check to confirm if payment successful
     else:
         logging.info("No current balance found! Exiting..")
-
-    #     try:
-    #         amount_to_pay_str = amount_to_pay_input.get_attribute('value')
-    #         amount_to_pay = float(amount_to_pay_str)
-
-    #         if amount_to_pay <= 0.00:
-    #             logging.info("No payment due!")
-    #             return False
-    #         if amount_to_pay > 300.00:
-    #             logging.info("Amount more than $300.")
-    #             # return False
-    #     except ValueError:
-    #         return False
-
-    #     payment_button.click()
-
-    #     # Wait for the modal to be visible
-    #     # WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "confirm-payment-container-ModalContainer")))
-
-    #     confirm_payment_button = find_element_after_load(driver, By.XPATH, "//a[@id='continue-bp-payment-confirm']/span", False)
-    #     confirm_payment_button.click()
-
-    #     # TODO: additional check to confirm if payment successful
-    #     return True
+        return False
     
-    # logging.info("Facing issues! It might be possible that no current balance has been posted to your account yet.")
-    # return False
+    return True
 
 def send_message(subject, receiver):
     msg = EmailMessage()
