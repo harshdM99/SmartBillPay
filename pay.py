@@ -23,7 +23,6 @@ parser.add_argument("-d", "--debug", action='store_true', default=False, help="E
 args = parser.parse_args()
 
 debug_mode = args.debug
-print(debug_mode)
 
 log_stream = io.StringIO()
 log_format = "%(message)s"
@@ -141,16 +140,22 @@ def make_payment(driver):
             next_button.click()
 
             confirm_button = find_element_after_load(driver, By.XPATH, "//div[@id='payment-review-confirmation-container']//button[text()='Schedule']")
-            # confirm_button.click()
-            # TODO: additional check to confirm if payment successful
+            confirm_button.click()
+            
+            # Additional check to confirm if payment is successful
+            success_msg = WebDriverWait(driver, 5).until(
+                EC.visibility_of_element_located((By.XPATH, "//h1[@id='skip-to-h1' and text()='Success']"))
+            )
+
+            if success_msg:
+                return True
+            return False
         else:
             logging.info("No current balance found! Exiting..")
             return False
     except Exception as e:
         logging.info("Error : ", e)
         return False
-        
-    return True
 
 def send_message(subject, receiver):
     msg = EmailMessage()
