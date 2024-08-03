@@ -18,6 +18,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 # TODO: GitHub readme
 # TODO: Docstring in functions
+# TODO: Deploy in docker
 parser = argparse.ArgumentParser(description='Automate BoFA credit card bill payment process and send email notifications')
 parser.add_argument("-d", "--debug", action='store_true', default=False, help="Enable debug mode (By default it is disabled)")
 args = parser.parse_args()
