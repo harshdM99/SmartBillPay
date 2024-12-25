@@ -2,6 +2,15 @@
 
 **SmartBillPay** is an automation tool written in Python to simplify and automate the process of paying credit card bills. This project is tailored for Bank of America accounts and ensures timely payments by integrating web automation and email notifications.
 
+## Table of Contents
+- [Features](#-Features)
+- [How to Build](#-how-to-build)
+- [Prerequisites](#-Prerequisites)
+- [.env File Configuration](#-.env-File-Configuration)
+- [Installation](#-Installation)
+- [Usage](#-Usage)
+- [Contributing](#-Contributing)
+
 ## Features
 * Automates login to the Bank of America website.
 * Navigates to the credit card payment page and schedules payments.
@@ -9,16 +18,16 @@
 * Operates in headless mode for seamless background execution.
 
 ## Tech Stack
-* Python
-* Selenium: For browser automation.
-* smtplib: For sending email notifications.
-* dotenv: For managing environment variables securely.
+* `Python`
+* `Selenium`: For browser automation.
+* `smtplib`: For sending email notifications.
+* `dotenv`: For managing environment variables securely.
 
 ## Prerequisites
-1. Python 3.7+: Ensure you have Python installed.
-1. Google Chrome/Brave Browser: The automation requires a Chromium-based browser.
-1. ChromeDriver: Compatible with your browser version.
-1. Environment Variables: Create a .env file to store sensitive information.
+1. **Python 3.7+**: Ensure you have Python installed.
+1. **Google Chrome/Brave Browser**: The automation requires a Chromium-based browser.
+1. **ChromeDriver**: Compatible with your browser version.
+1. **Environment Variables**: Create a .env file to store sensitive information.
 
 ## .env File Configuration
 ```makefile
@@ -51,8 +60,6 @@ python smartbillpay.py
 ```
 Optional Arguments
 * `-d`, `--debug`: Enables debug mode to keep the browser window open for inspection.
-
-python smartbillpay.py -d
 
 ## Future Enhancements
 Extend compatibility to other banks.
