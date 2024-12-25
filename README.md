@@ -3,13 +3,13 @@
 **SmartBillPay** is an automation tool written in Python to simplify and automate the process of paying credit card bills. This project is tailored for Bank of America accounts and ensures timely payments by integrating web automation and email notifications.
 
 ## Table of Contents
-- [Features](#-Features)
-- [How to Build](#-how-to-build)
-- [Prerequisites](#-Prerequisites)
-- [.env File Configuration](#-.env-File-Configuration)
-- [Installation](#-Installation)
-- [Usage](#-Usage)
-- [Contributing](#-Contributing)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [.env File Configuration](#env-file-configuration)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
 
 ## Features
 * Automates login to the Bank of America website.
